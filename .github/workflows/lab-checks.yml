@@ -1,0 +1,49 @@
+name: Lab checks
+
+# Runs on pull requests into main (opened, new commits pushed, reopened).
+# Each lab has its own job, which runs only when the PR comes from the branch
+# of that lab: a PR from `lab1` runs the lab1 job and skips the others.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lab1:
+    if: github.head_ref == 'lab1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The README promises that provided/, Makefile and scripts/ are restored
+      # to their original version before checking. The original version is the
+      # commit tagged lab1-template (set when the lab is pushed to the student
+      # repositories), or else the repository's first commit.
+      - name: Restore protected files
+        run: |
+          ref=$(git rev-parse -q --verify refs/tags/lab1-template || git rev-list --max-parents=0 HEAD | tail -n 1)
+          git checkout "$ref" -- lab1/provided lab1/scripts lab1/Makefile
+
+      - name: Compilation
+        run: make -C lab1 clean all
+
+      # Run several times: the grading requires a pass every time.
+      - name: Step 1 (make check1, 3 runs)
+        if: success() || failure()
+        working-directory: lab1
+        run: for i in 1 2 3; do make -s check1 || exit 1; done
+
+      - name: Step 2 (make check2, 3 runs)
+        if: success() || failure()
+        working-directory: lab1
+        run: for i in 1 2 3; do make -s check2 || exit 1; done
+
+      - name: Step 3 (make check3, 3 runs)
+        if: success() || failure()
+        working-directory: lab1
+        run: for i in 1 2 3; do make -s check3 || exit 1; done

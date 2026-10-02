@@ -1,0 +1,22 @@
+# Build products (all labs)
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+build/
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Lab 1 executables
+lab1/step1
+lab1/step2
+lab1/step3
+lab1/volatileDemo_bug
+lab1/volatileDemo_ok
